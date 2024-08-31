@@ -9,10 +9,11 @@ struct SocketContext {
 
     List(<IOContext*>) arrIOContext;
     IOContextPool ioContextPool;
-    Mutex csLock;
+    Mutex* csLock;
 }
 
 fn void SocketContext.init(SocketContext* self) {
+    self.csLock = mem::new(Mutex);
     self.csLock.init()!!;
     self.arrIOContext.new_init();
     self.connSocket = INVALID_SOCKET;
@@ -36,9 +37,10 @@ fn void SocketContext.free(SocketContext* self) {
 
     self.csLock.destroy()!!;
 }
-
+import std::io;
 fn IOContext* SocketContext.getNewIOContext(SocketContext* self) {
     IOContext* context = self.ioContextPool.allocateIOContext();
+    
     if (context != null) {
         self.csLock.lock()!!;
         self.arrIOContext.push(context);

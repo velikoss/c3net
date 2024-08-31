@@ -280,9 +280,13 @@ fn bool IOCPBase.doAccept(IOCPBase* self, SocketContext * sockContext, IOContext
 		io::eprintfn("WSAIoctl failed: %d", win_WSAGetLastError());
 	}
 
+
+	io::printn("hi");
     self.onConnectionEstablished(newSockContext);
 
+	
 	IOContext *newIoContext = newSockContext.getNewIOContext();
+	io::printn("bye");
 	newIoContext.ioType = RECV_POSTED;
 	newIoContext.ioSocket = newSockContext.connSocket;
 
@@ -361,22 +365,23 @@ fn void IOCPBase.deInitialize(IOCPBase* self) {
 
 fn ulong workerThreadProc(void* self) {    
     IOCPBase* iocp = (IOCPBase*) self;
-	WSAOverlapped* ol = null;
+	Overlapped* ol = null;
 	SocketContext* sockContext;
 	Win32_DWORD dwBytes = 0;
 	IOContext* ioContext = null;
     
 	while (win_WaitForSingleObject(iocp.stopEvent, 0) != 0x00000000) {
-        bool bRet = win_GetQueuedCompletionStatus(iocp.completionPort, null, (ulong*) &sockContext, ol, 0xFFFFFFFF);
-        io::printn("hi");
-		ioContext = ((IOContext *)((ulong*)(ol) - (ulong*)(&((IOContext *)0).overlapped))); // crazy
+        bool bRet = win_GetQueuedCompletionStatus(iocp.completionPort, &dwBytes, (ulong*) &sockContext, &ol, 0xFFFFFFFF);
+        
+		ioContext = ((IOContext *)((char*)(ol) - (ulong)(&((IOContext *)0).overlapped))); // crazy
+
 		// ioContext = ((IOContext *)((char*)(ol) - (ulong*)(&((IOContext *)0).overlapped))); // crazy
         
 		// if ((ulong) sockContext == -1UL) { break; }
 
 		if (!bRet) {
 			ulong dwErr = win_GetLastError();
- 
+			
 			if (dwErr == 0x00000102L) {
 				if (!iocp.isSocketAlive(sockContext.connSocket)) {
 					iocp.onConnectionClosed(sockContext);
@@ -399,12 +404,15 @@ fn ulong workerThreadProc(void* self) {
 			}
 		}
 		else {
+			io::printn(ioContext);
 			if ((dwBytes == 0) && (ioContext.ioType == RECV_POSTED || ioContext.ioType == SEND_POSTED)) {
+				io::printn("closing");
 				iocp.onConnectionClosed(sockContext);
 				iocp.doClose(sockContext);
 				continue;
 			}
 			else {
+				io::printn("+");
 				switch (ioContext.ioType) {
                     case ACCEPT_POSTED:
                         iocp.doAccept(sockContext, ioContext);

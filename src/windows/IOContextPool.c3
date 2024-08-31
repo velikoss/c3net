@@ -8,10 +8,11 @@ const usz INIT_IOCONTEXT_NUM = 100;
 
 struct IOContextPool {
     List(<IOContext*>) contextList;
-    Mutex csLock;
+    Mutex* csLock;
 }
 
 fn void IOContextPool.init(IOContextPool* self) {
+    self.csLock = mem::new(Mutex);
     self.csLock.init()!!;
     self.contextList.new_init();
 
@@ -36,6 +37,7 @@ fn void IOContextPool.free(IOContextPool* self) {
     self.csLock.destroy()!!;
 }
 
+import std::io;
 fn IOContext* IOContextPool.allocateIOContext(IOContextPool* self) {
     IOContext* context = null;
     self.csLock.lock()!!;

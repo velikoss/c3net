@@ -14,14 +14,6 @@ def WSAEvent = Handle; // lol
 def Socket = Handle; // lol
 const Socket INVALID_SOCKET = (Socket)(~0UL); // something crazy
 
-struct WSAOverlapped {
-    ulong w_Internal;
-    ulong w_InternalHigh;
-    ulong w_Offset;
-    ulong w_OffsetHigh;
-    WSAEvent w_hEvent;
-}
-
 struct WSABuf {
     ulong len;
     char* buf;
@@ -76,10 +68,10 @@ extern fn Handle win_CreateEvent(void* lpEventAttributes, bool bManualReset, boo
 extern fn Handle win_CreateThread(void* lpEventAttributes, ulong dwStackSize, void* lpStartAddress, void* lpParameter, Win32_DWORD dwCreationFlags, Win32_DWORD* lpThreadId) @extern("CreateThread");
 extern fn bool win_SetEvent(Handle hEvent) @extern("SetEvent");
 extern fn bool win_CloseHandle(Handle handle) @extern("CloseHandle");
-extern fn bool win_PostQueuedCompletionStatus(Handle completitionPort, ulong dwNumberOfBytesTransferred, ulong* dwCompletionKey, void* lpOverlapped) @extern("PostQueuedCompletionStatus");
+extern fn bool win_PostQueuedCompletionStatus(Handle completitionPort, ulong dwNumberOfBytesTransferred, ulong* dwCompletionKey, Overlapped* lpOverlapped) @extern("PostQueuedCompletionStatus");
 extern fn ulong win_WaitForMultipleObjects(ulong nCount, Handle* lpHandles, bool bWaitAll, ulong dwMilliseconds) @extern("WaitForMultipleObjects");
 extern fn ulong win_WaitForSingleObject(Handle hHandle, ulong dwMilliseconds) @extern("WaitForSingleObject");
-extern fn bool win_GetQueuedCompletionStatus(Handle hHandle, Win32_DWORD* lpNumberOfBytesTransferred, ulong* lpCompletionKey, WSAOverlapped* lpOverlapped, Win32_DWORD dwMilliseconds) @extern("GetQueuedCompletionStatus");
+extern fn bool win_GetQueuedCompletionStatus(Handle hHandle, Win32_DWORD* lpNumberOfBytesTransferred, ulong* lpCompletionKey, Overlapped** lpOverlapped, Win32_DWORD dwMilliseconds) @extern("GetQueuedCompletionStatus");
 extern fn Handle win_CreateIoCompletionPort(void* fileHandle, void* existingCompletionPort, ulong* completionKey, ulong numberOfConcurrentThreads) @extern("CreateIoCompletionPort");
 extern fn Handle win_GetSystemInfo(SystemInfo* info) @extern("GetSystemInfo");
 extern fn Handle win_WSASocket(CInt af, CInt type, CInt protocol, void* lpProtocolInfo, CInt g, Win32_DWORD dwFlags) @extern("WSASocketA");
@@ -102,4 +94,27 @@ struct Tcp_keepalive {
     ulong  onoff;
     ulong  keepalivetime;
     ulong  keepaliveinterval;
+}
+
+struct DummyOverlapped {
+    Win32_DWORD offset;
+    Win32_DWORD offsetHigh;
+}
+
+struct Overlapped {
+  ulong* internal;
+  ulong* internalHigh;
+  union {
+    DummyOverlapped dummy;
+    void* pointer;
+  }
+  Handle hEvent;
+}
+
+struct WSAOverlapped {
+    ulong w_Internal;
+    ulong w_InternalHigh;
+    ulong w_Offset;
+    ulong w_OffsetHigh;
+    WSAEvent w_hEvent;
 }
