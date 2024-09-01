@@ -40,7 +40,7 @@ fn void SocketContext.free(SocketContext* self) {
 import std::io;
 fn IOContext* SocketContext.getNewIOContext(SocketContext* self) {
     IOContext* context = self.ioContextPool.allocateIOContext();
-    
+    io::printn(context);
     if (context != null) {
         self.csLock.lock()!!;
         self.arrIOContext.push(context);

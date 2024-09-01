@@ -9,7 +9,7 @@ enum IoOperationType {
     RECV_POSTED,
 }
 
-def Handle = void*; // lol
+def Handle = Win32_HANDLE; // lol
 def WSAEvent = Handle; // lol
 def Socket = Handle; // lol
 const Socket INVALID_SOCKET = (Socket)(~0UL); // something crazy
@@ -96,19 +96,17 @@ struct Tcp_keepalive {
     ulong  keepaliveinterval;
 }
 
-struct DummyOverlapped {
-    Win32_DWORD offset;
-    Win32_DWORD offsetHigh;
-}
-
 struct Overlapped {
-  ulong* internal;
-  ulong* internalHigh;
+  Win32_ULONG_PTR internal;
+  Win32_ULONG_PTR internalHigh;
   union {
-    DummyOverlapped dummy;
-    void* pointer;
+    struct {
+      Win32_DWORD offset;
+      Win32_DWORD offsetHigh;
+    }
+    Win32_PVOID pointer;
   }
-  Handle hEvent;
+  Win32_HANDLE hEvent;
 }
 
 struct WSAOverlapped {

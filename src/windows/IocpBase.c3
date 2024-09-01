@@ -243,7 +243,6 @@ fn bool IOCPBase.postSend(IOCPBase* self, SocketContext* sockContext, IOContext*
 }
 
 fn bool IOCPBase.doAccept(IOCPBase* self, SocketContext * sockContext, IOContext * ioContext) {
-	
 	atomic::fetch_add(&self.acceptPostCnt, 1);
 	atomic::fetch_add(&self.acceptPostCnt, -1);
 	SocketAddrIn* clientAddr = null;
@@ -280,11 +279,9 @@ fn bool IOCPBase.doAccept(IOCPBase* self, SocketContext * sockContext, IOContext
 		io::eprintfn("WSAIoctl failed: %d", win_WSAGetLastError());
 	}
 
+	self.onConnectionEstablished(newSockContext);
 
 	io::printn("hi");
-    self.onConnectionEstablished(newSockContext);
-
-	
 	IOContext *newIoContext = newSockContext.getNewIOContext();
 	io::printn("bye");
 	newIoContext.ioType = RECV_POSTED;

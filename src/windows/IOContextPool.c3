@@ -19,9 +19,9 @@ fn void IOContextPool.init(IOContextPool* self) {
     self.csLock.lock()!!;
     for (usz i = 0; i < INIT_IOCONTEXT_NUM; i++)
     {
-        IOContext context;
+        IOContext* context = mem::new(IOContext);
         context.init();
-        self.contextList.push(@clone(context));
+        self.contextList.push(context);
     }
     self.csLock.unlock()!!;
 }
