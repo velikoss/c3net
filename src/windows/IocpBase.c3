@@ -57,6 +57,8 @@ fn void IOCPBase.init(IOCPBase* self,
     self.onRecvCompleted = onRecvCompleted;
     self.onSendCompleted = onSendCompleted;
 
+	listenSockContext = mem::new(SocketContext);
+	listenSockContext.init();
     WsaData wsaData;
     win_WSAStartup(0x0202, &wsaData);
 	self.stopEvent = win_CreateEvent(null, true, false, null);
@@ -320,8 +322,9 @@ fn void IOCPBase.stop(IOCPBase* self) {
     if (self.listenSockContext != null && self.listenSockContext.connSocket != INVALID_SOCKET) {
 		win_SetEvent(self.stopEvent);
 
-		for (int i = 0; i < self.workerThreadNum; i++)
-            win_PostQueuedCompletionStatus(self.completionPort, 0, (ulong*) -1UL, null);
+		for (int i = 0; i < self.workerThreadNum; i++) {
+            win_PostQueuedCompletionStatus(self.completionPort, 0, (ulong*) -(1UL), null);
+		}
 
 		win_WaitForMultipleObjects(self.workerThreadNum, self.workerThreads, true, ulong.max);
 
@@ -370,7 +373,7 @@ fn ulong workerThreadProc(void* self) {
 	while (win_WaitForSingleObject(iocp.stopEvent, 0) != 0x00000000) {
         bool bRet = win_GetQueuedCompletionStatus(iocp.completionPort, &dwBytes, (ulong*) &sockContext, &ol, 0xFFFFFFFF);
         
-		ioContext = ((IOContext *)((char*)(ol) - (ulong)(&((IOContext *)0).overlapped))); // crazy
+		ioContext = ((IOContext *)((char*)(ol))); // crazy
 
 		// ioContext = ((IOContext *)((char*)(ol) - (ulong*)(&((IOContext *)0).overlapped))); // crazy
         

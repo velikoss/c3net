@@ -7,7 +7,7 @@ struct SocketContext {
     Socket connSocket;
     InAddr clientAddr;
 
-    List(<IOContext*>) arrIOContext;
+    List{IOContext*} arrIOContext;
     IOContextPool ioContextPool;
     Mutex* csLock;
 }
@@ -15,7 +15,7 @@ struct SocketContext {
 fn void SocketContext.init(SocketContext* self) {
     self.csLock = mem::new(Mutex);
     self.csLock.init()!!;
-    self.arrIOContext.new_init();
+    self.arrIOContext.init(mem);
     self.connSocket = INVALID_SOCKET;
     self.ioContextPool.init();
     win_ZeroMemory(&self.clientAddr, InAddr.sizeof);

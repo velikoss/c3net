@@ -7,14 +7,14 @@ import std::thread;
 const usz INIT_IOCONTEXT_NUM = 100;
 
 struct IOContextPool {
-    List(<IOContext*>) contextList;
-    Mutex* csLock;
+    List{IOContext*} contextList;
+    Mutex csLock;
 }
 
 fn void IOContextPool.init(IOContextPool* self) {
-    self.csLock = mem::new(Mutex);
+    // self.csLock = mem::new(Mutex);
     self.csLock.init()!!;
-    self.contextList.new_init();
+    self.contextList.init(mem);
 
     self.csLock.lock()!!;
     for (usz i = 0; i < INIT_IOCONTEXT_NUM; i++)

@@ -9,9 +9,9 @@ enum IoOperationType {
     RECV_POSTED,
 }
 
-def Handle = Win32_HANDLE; // lol
-def WSAEvent = Handle; // lol
-def Socket = Handle; // lol
+alias Handle = Win32_HANDLE; // lol
+alias WSAEvent = Handle; // lol
+alias Socket = Handle; // lol
 const Socket INVALID_SOCKET = (Socket)(~0UL); // something crazy
 
 struct WSABuf {
@@ -46,11 +46,11 @@ macro void win_ZeroMemory(Handle destination, usz length) {
     libc::memset(destination, 0, length);
 }
 
-def FnVoidContext = fn void(SocketContext*);
-def FnVoidContextError = fn void(SocketContext*, int);
-def FnVoidContextIO = fn void(SocketContext*, IOContext*);
-def LPFn_ACCEPTEX = fn bool(Socket, Socket, void*, Win32_DWORD, Win32_DWORD, Win32_DWORD, Win32_DWORD*, void*);
-def LPFn_GETACCEPTEXSOCKADDRS = fn void(void*, ulong, ulong, ulong, void*, long*, void*, long*);
+alias FnVoidContext = fn void(SocketContext*);
+alias FnVoidContextError = fn void(SocketContext*, int);
+alias FnVoidContextIO = fn void(SocketContext*, IOContext*);
+alias LPFn_ACCEPTEX = fn bool(Socket, Socket, void*, Win32_DWORD, Win32_DWORD, Win32_DWORD, Win32_DWORD*, void*);
+alias LPFn_GETACCEPTEXSOCKADDRS = fn void(void*, ulong, ulong, ulong, void*, long*, void*, long*);
 
 const Handle INVALID_HANDLE_VALUE = ((Handle)~0UL);
 
